@@ -23,7 +23,7 @@ defmodule Nori do
       old.attributes
       |> Enum.to_list()
       |> zip(Enum.to_list(next.attributes))
-      |> Enum.flat_map(fn {left, right} -> diff_attributes(left, right, path) end)
+      |> Enum.flat_map(fn {left, right} -> compare_attributes(left, right, path) end)
 
     children =
       old.children
@@ -34,8 +34,9 @@ defmodule Nori do
     elements ++ attributes ++ children
   end
 
-  def diff(old, next, path) when old != next, do: [{:inner, {path, next}}]
-  def diff(old, next, _path) when old == next, do: []
+  def diff(old, next, path) do
+    compare_element(old, next, path)
+  end
 
   def compare_element(nil, next = %{}, path) do
     [{:create, {path, next}}]
@@ -55,13 +56,17 @@ defmodule Nori do
 
   def compare_element(%{}, %{}, _), do: []
 
-  def diff_attributes({key, _}, nil, path), do: [{:delete_attribute, {path, key}}]
+  def compare_element(_old, nil, path), do: [{:delete_text, path}]
+  def compare_element(old, next, path) when old != next, do: [{:set_text, {path, next}}]
+  def compare_element(old, next, _path) when old == next, do: []
+
+  def compare_attributes({key, _}, nil, path), do: [{:delete_attribute, {path, key}}]
   # def diff_attributes(nil, {key, value}, path), do: [{:create_attribute, {path, key, value}}]
 
-  def diff_attributes(old, next = {key, value}, path) when old != next,
+  def compare_attributes(old, next = {key, value}, path) when old != next,
     do: [{:set_attribute, {path, key, value}}]
 
-  def diff_attributes(_old, _next, _path), do: []
+  def compare_attributes(_old, _next, _path), do: []
 
   def zip([lh | lt], [rh | rt]) do
     [{lh, rh} | zip(lt, rt)]
@@ -104,7 +109,7 @@ defmodule Nori do
   def test2() do
     element("div", [
       element("div", [
-        element("div", [class: "green"], "goodbye")
+        element("div", [class: "green"], [])
       ]),
       element("span", "a"),
       element("span", "b"),
