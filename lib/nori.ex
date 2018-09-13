@@ -9,7 +9,7 @@ defmodule Nori do
   def element(name, attributes, children) do
     %Nori{
       name: name,
-      attributes: attributes,
+      attributes: Enum.into(attributes, %{}),
       children: children
     }
   end
@@ -17,31 +17,51 @@ defmodule Nori do
   def diff(old, next), do: diff(old, next, [])
 
   def diff(old = %{}, next = %{}, path) do
-    case equals(old, next) do
-      true ->
-        old.children
-        |> zip(next.children)
-        |> Stream.with_index()
-        |> Enum.flat_map(fn {{left, right}, index} -> diff(left, right, [index | path]) end)
+    elements = compare_element(old, next, path)
 
-      false ->
-        [
-          diff(old, nil, path),
-          diff(nil, next, path)
-        ]
-    end
-  end
+    attributes =
+      old.attributes
+      |> Enum.to_list()
+      |> zip(Enum.to_list(next.attributes))
+      |> Enum.flat_map(fn {left, right} -> diff_attributes(left, right, path) end)
 
-  def diff(nil, next = %{}, path) do
-    [{:create, {path, next}}]
-  end
+    children =
+      old.children
+      |> zip(next.children)
+      |> Stream.with_index()
+      |> Enum.flat_map(fn {{left, right}, index} -> diff(left, right, [index | path]) end)
 
-  def diff(%{}, nil, path) do
-    [{:delete, path}]
+    elements ++ attributes ++ children
   end
 
   def diff(old, next, path) when old != next, do: [{:inner, {path, next}}]
   def diff(old, next, _path) when old == next, do: []
+
+  def compare_element(nil, next = %{}, path) do
+    [{:create, {path, next}}]
+  end
+
+  def compare_element(%{}, nil, path) do
+    [{:delete, path}]
+  end
+
+  def compare_element(old = %{name: o_name}, next = %{name: n_name}, path)
+      when o_name != n_name do
+    [
+      diff(nil, next, path),
+      diff(old, nil, path)
+    ]
+  end
+
+  def compare_element(%{}, %{}, _), do: []
+
+  def diff_attributes({key, _}, nil, path), do: [{:delete_attribute, {path, key}}]
+  # def diff_attributes(nil, {key, value}, path), do: [{:create_attribute, {path, key, value}}]
+
+  def diff_attributes(old, next = {key, value}, path) when old != next,
+    do: [{:set_attribute, {path, key, value}}]
+
+  def diff_attributes(_old, _next, _path), do: []
 
   def zip([lh | lt], [rh | rt]) do
     [{lh, rh} | zip(lt, rt)]
@@ -50,8 +70,6 @@ defmodule Nori do
   def zip([], []), do: []
   def zip([lh | lt], []), do: zip([lh | lt], [nil])
   def zip([], [rh | rt]), do: zip([nil], [rh | rt])
-
-  def equals(%{name: o_name}, %{name: n_name}), do: o_name === n_name
 
   def to_html(%{name: name, attributes: attributes, children: children}) do
     [
@@ -76,7 +94,7 @@ defmodule Nori do
 
   def test1() do
     element("div", [
-      element("div", [
+      element("div", [class: "pink"], [
         element("div", [class: "blue"], "hello")
       ]),
       element("span", "lol")
@@ -86,7 +104,7 @@ defmodule Nori do
   def test2() do
     element("div", [
       element("div", [
-        element("div", [class: "blue"], "goodbye")
+        element("div", [class: "green"], "goodbye")
       ]),
       element("span", "a"),
       element("span", "b"),
