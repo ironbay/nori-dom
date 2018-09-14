@@ -17,7 +17,7 @@ defmodule Nori do
   def diff(old, next),
     do:
       diff(old, next, [])
-      |> Stream.map(fn {op, path, data} -> {op, Enum.reverse(path), data} end)
+      # |> Stream.map(fn {op, path, data} -> {op, Enum.reverse(path), data} end)
       |> Enum.sort_by(fn {op, _, _} ->
         case op do
           :element_delete -> 0
