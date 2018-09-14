@@ -1,5 +1,5 @@
 defmodule Nori do
-  defstruct name: "", attributes: [], children: []
+  defstruct key: 0, name: "", attributes: [], children: []
 
   def element(name, children), do: element(name, [], children)
 
@@ -10,13 +10,19 @@ defmodule Nori do
     %Nori{
       name: name,
       attributes: Enum.into(attributes, %{}),
-      children: children
+      children:
+        children
+        |> Enum.with_index()
+        |> Enum.map(fn
+          {item = %Nori{}, index} -> Map.put(item, :key, index)
+          {item, _} -> item
+        end)
     }
   end
 
   def diff(old, next),
     do:
-      diff(old, next, [0])
+      diff(old, next, [])
       |> Stream.map(fn {op, path, data} -> {op, Enum.reverse(path), data} end)
       |> Enum.sort_by(fn {op, _, _} ->
         case op do
@@ -38,8 +44,7 @@ defmodule Nori do
         children =
           old.children
           |> zip(next.children)
-          |> Stream.with_index()
-          |> Enum.flat_map(fn {{left, right}, index} -> diff(left, right, [index | path]) end)
+          |> Enum.flat_map(fn {left, right} -> diff(left, right, [next.key | path]) end)
 
         attributes ++ children
 
@@ -53,11 +58,11 @@ defmodule Nori do
   end
 
   def compare_element(nil, next = %{}, path) do
-    [{:element_create, path, next}]
+    [{:element_create, [next.key | path], next}]
   end
 
-  def compare_element(%{}, nil, path) do
-    [{:element_delete, path, nil}]
+  def compare_element(old = %{}, nil, path) do
+    [{:element_delete, [old.key | path], nil}]
   end
 
   def compare_element(old = %{name: o_name}, next = %{name: n_name}, path)
@@ -90,10 +95,13 @@ defmodule Nori do
   def zip([lh | lt], []), do: zip([lh | lt], [nil])
   def zip([], [rh | rt]), do: zip([nil], [rh | rt])
 
-  def to_html(%{name: name, attributes: attributes, children: children}) do
+  def to_html(%{name: name, key: key, attributes: attributes, children: children}) do
     [
       "<",
       name,
+      " nori=\"",
+      Integer.to_string(key),
+      "\"",
       Enum.map(attributes, fn {key, value} -> [" ", Atom.to_string(key), "=\"", value, "\" "] end),
       ">",
       Enum.map(children, &to_html/1),
@@ -120,7 +128,9 @@ defmodule Nori do
 
   def test2() do
     element("div", [class: "pad-8 line-5"], [
-      element("div", "Hey there")
+      element("div", "Hey there"),
+      element("div", "Bye there"),
+      element("div", "Bye there")
     ])
   end
 end
