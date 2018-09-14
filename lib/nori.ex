@@ -57,7 +57,7 @@ defmodule Nori do
   end
 
   def compare_element(%{}, nil, path) do
-    [{:element_delete, path}]
+    [{:element_delete, path, nil}]
   end
 
   def compare_element(old = %{name: o_name}, next = %{name: n_name}, path)
@@ -112,22 +112,15 @@ defmodule Nori do
   end
 
   def test1() do
-    element("div", [
-      element("div", [class: "pink"], [
-        element("div", [class: "blue"], "hello")
-      ]),
-      element("span", "lol")
+    element("div", [class: "pad-8 line-5"], [
+      element("div", "Hey there"),
+      element("div", "Bye there")
     ])
   end
 
   def test2() do
-    element("div", [
-      element("div", [
-        element("div", [class: "green"], ["goodbye"])
-      ]),
-      element("span", "a"),
-      element("span", "b"),
-      element("span", "c")
+    element("div", [class: "pad-8 line-5"], [
+      element("div", "Hey there")
     ])
   end
 end
