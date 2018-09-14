@@ -31,17 +31,25 @@ export function patch(root: HTMLElement, ops: Operation[]) {
 
             case OP_CODE.ATTRIBUTE_DELETE:
                 target(root, path).removeAttribute(data)
+                break
 
             case OP_CODE.TEXT_SET:
                 target(root, path).innerHTML = data
+                break
 
             case OP_CODE.TEXT_DELETE:
                 target(root, path).innerHTML = ''
+                break
+
+            default:
+                break
         }
     }
 }
 
 function target(root: HTMLElement, path: string[]) {
+    if (path.length === 0)
+        return root
     const selector = path.map(item => `[nori="${item}"]`).join(' > ')
     return root.querySelector(selector)
 }
