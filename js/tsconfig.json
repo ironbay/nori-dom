@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "outDir": "./lib",
+        "sourceMap": true,
+        "noImplicitAny": false,
+        "module": "commonjs",
+        "target": "es5",
+        "declaration": true,
+        "lib": [
+            "dom",
+            "es5",
+            "scripthost",
+            "es2015.promise",
+            "es2015.collection",
+            "es2017.object"
+        ]
+    },
+    "include": [
+        "src/index.ts"
+    ]
+}
