@@ -14,24 +14,38 @@ defmodule Nori do
     }
   end
 
-  def diff(old, next), do: diff(old, next, [])
+  def diff(old, next),
+    do:
+      diff(old, next, [])
+      |> Stream.map(fn {op, path, data} -> {op, Enum.reverse(path), data} end)
+      |> Enum.sort_by(fn {op, _, _} ->
+        case op do
+          :element_delete -> 0
+          :attribute_delete -> 1
+          _ -> 10
+        end
+      end)
 
   def diff(old = %{}, next = %{}, path) do
-    elements = compare_element(old, next, path)
+    case Enum.flat_map(compare_element(old, next, path), & &1) do
+      [] ->
+        attributes =
+          old.attributes
+          |> Enum.to_list()
+          |> zip(Enum.to_list(next.attributes))
+          |> Enum.flat_map(fn {left, right} -> compare_attributes(left, right, path) end)
 
-    attributes =
-      old.attributes
-      |> Enum.to_list()
-      |> zip(Enum.to_list(next.attributes))
-      |> Enum.flat_map(fn {left, right} -> compare_attributes(left, right, path) end)
+        children =
+          old.children
+          |> zip(next.children)
+          |> Stream.with_index()
+          |> Enum.flat_map(fn {{left, right}, index} -> diff(left, right, [index | path]) end)
 
-    children =
-      old.children
-      |> zip(next.children)
-      |> Stream.with_index()
-      |> Enum.flat_map(fn {{left, right}, index} -> diff(left, right, [index | path]) end)
+        attributes ++ children
 
-    elements ++ attributes ++ children
+      elements ->
+        elements
+    end
   end
 
   def diff(old, next, path) do
@@ -39,11 +53,11 @@ defmodule Nori do
   end
 
   def compare_element(nil, next = %{}, path) do
-    [{:create, {path, next}}]
+    [{:element_create, path, next}]
   end
 
   def compare_element(%{}, nil, path) do
-    [{:delete, path}]
+    [{:element_delete, path}]
   end
 
   def compare_element(old = %{name: o_name}, next = %{name: n_name}, path)
@@ -56,15 +70,15 @@ defmodule Nori do
 
   def compare_element(%{}, %{}, _), do: []
 
-  def compare_element(_old, nil, path), do: [{:delete_text, path}]
-  def compare_element(old, next, path) when old != next, do: [{:set_text, {path, next}}]
+  def compare_element(_old, nil, path), do: [{:text_delete, path}]
+  def compare_element(old, next, path) when old != next, do: [{:text_set, path, next}]
   def compare_element(old, next, _path) when old == next, do: []
 
-  def compare_attributes({key, _}, nil, path), do: [{:delete_attribute, {path, key}}]
+  def compare_attributes({key, _}, nil, path), do: [{:attribute_delete, path, key}]
   # def diff_attributes(nil, {key, value}, path), do: [{:create_attribute, {path, key, value}}]
 
   def compare_attributes(old, next = {key, value}, path) when old != next,
-    do: [{:set_attribute, {path, key, value}}]
+    do: [{:attribute_set, path, {key, value}}]
 
   def compare_attributes(_old, _next, _path), do: []
 
@@ -109,7 +123,7 @@ defmodule Nori do
   def test2() do
     element("div", [
       element("div", [
-        element("div", [class: "green"], [])
+        element("div", [class: "green"], ["goodbye"])
       ]),
       element("span", "a"),
       element("span", "b"),
