@@ -115,23 +115,4 @@ defmodule Nori do
   def to_html(content) do
     content
   end
-
-  def test() do
-    diff(test1(), test2())
-  end
-
-  def test1() do
-    element("div", [class: "pad-8 line-5"], [
-      element("div", "Hey there"),
-      element("div", "Bye there")
-    ])
-  end
-
-  def test2() do
-    element("div", [class: "pad-8 line-5"], [
-      element("div", "Hey there"),
-      element("div", "Bye there"),
-      element("div", "Bye there")
-    ])
-  end
 end
