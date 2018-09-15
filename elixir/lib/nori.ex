@@ -9,7 +9,7 @@ defmodule Nori do
   def element(name, attributes, children) do
     %Nori{
       name: name,
-      attributes: Enum.into(attributes, %{}),
+      attributes: attributes,
       children:
         children
         |> Enum.with_index()
@@ -37,7 +37,6 @@ defmodule Nori do
       [] ->
         attributes =
           old.attributes
-          |> Enum.to_list()
           |> zip(Enum.to_list(next.attributes))
           |> Enum.flat_map(fn {left, right} ->
             compare_attributes(left, right, [next.key | path])
