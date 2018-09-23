@@ -7,5 +7,16 @@ declare enum OP_CODE {
     TEXT_DELETE = 5
 }
 declare type Operation = [OP_CODE, string[], any];
-export declare function patch(root: HTMLElement, ops: Operation[]): void;
+export default class Nori {
+    private _root;
+    onevent: (e: NoriEvent) => void;
+    constructor(root: HTMLElement);
+    patch(ops: Operation[]): void;
+    event_scan(t: Element, shallow?: boolean): void;
+    event_bind(t: Element, type: string, handler: string): void;
+}
+interface NoriEvent {
+    handler: string;
+    data: any;
+}
 export {};

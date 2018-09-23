@@ -2,7 +2,7 @@
     "compilerOptions": {
         "sourceMap": true,
         "noImplicitAny": false,
-        "module": "commonjs",
+        "module": "none",
         "target": "es5",
         "declaration": true,
         "lib": [
@@ -12,10 +12,9 @@
             "es2015.promise",
             "es2015.collection",
             "es2017.object"
-        ],
-        "outDir": "lib",
+        ]
     },
     "include": [
-        "src/index.ts",
+        "index.ts",
     ]
 }
