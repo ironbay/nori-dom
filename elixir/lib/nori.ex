@@ -1,7 +1,9 @@
 defmodule Nori do
+  alias Nori.Callback
   defstruct key: 0, name: "", attributes: [], children: []
 
-  def element(name, children), do: element(name, [], children)
+  def element(name), do: element(name, [], [])
+  def element(name, attributes), do: element(name, attributes, [])
 
   def element(name, attributes, children) when is_list(children) === false,
     do: element(name, attributes, [children])
@@ -9,13 +11,26 @@ defmodule Nori do
   def element(name, attributes, children) do
     %Nori{
       name: name,
-      attributes: attributes,
+      attributes:
+        attributes
+        |> Enum.map(fn
+          {key, value} when is_function(value) -> {key, Callback.add(value)}
+          {key, {value, args}} when is_function(value) -> {key, Callback.add(value, args)}
+          {key, value} when is_binary(value) -> {key, value}
+          {key, value} -> {key, inspect(value)}
+        end),
       children:
         children
-        |> Enum.with_index()
+        |> Stream.flat_map(fn
+          item when is_list(item) -> item
+          item -> [item]
+        end)
+        |> Stream.filter(fn item -> item != false && item != nil end)
+        |> Stream.with_index()
         |> Enum.map(fn
           {item = %Nori{}, index} -> Map.put(item, :key, index)
-          {item, _} -> item
+          {item, _} when is_binary(item) -> item
+          {item, _} -> inspect(item)
         end)
     }
   end
@@ -76,7 +91,7 @@ defmodule Nori do
 
   def compare_element(%{}, %{}, _), do: []
 
-  def compare_element(_old, nil, path), do: [{:text_delete, path}]
+  def compare_element(_old, nil, path), do: [{:text_delete, path, nil}]
   def compare_element(old, next, path) when old != next, do: [{:text_set, path, next}]
   def compare_element(old, next, _path) when old == next, do: []
 

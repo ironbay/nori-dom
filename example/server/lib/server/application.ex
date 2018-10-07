@@ -10,6 +10,7 @@ defmodule Server.Application do
     children = [
       # Starts a worker by calling: Server.Worker.start_link(arg)
       # {Server.Worker, arg},
+      {Riptide.Server, [port: 12000, commands: [Server.Command]]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

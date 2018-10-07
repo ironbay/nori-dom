@@ -13,6 +13,8 @@ var EVENTS;
 (function (EVENTS) {
     EVENTS["nori-click"] = "click";
     EVENTS["nori-change"] = "change";
+    EVENTS["nori-press"] = "keypress";
+    EVENTS["nori-keyup"] = "keyup";
 })(EVENTS || (EVENTS = {}));
 var Nori = /** @class */ (function () {
     function Nori(root) {
@@ -42,9 +44,13 @@ var Nori = /** @class */ (function () {
                     {
                         var t = target(this._root, path);
                         var event_1 = EVENTS[key];
-                        t.setAttribute(key, value);
                         if (event_1)
                             this.event_bind(t, event_1, value);
+                        if (key === 'value') {
+                            t.value = value;
+                            return;
+                        }
+                        t.setAttribute(key, value);
                     }
                     break;
                 case OP_CODE.ATTRIBUTE_DELETE:
@@ -79,6 +85,7 @@ var Nori = /** @class */ (function () {
     Nori.prototype.event_bind = function (t, type, handler) {
         var _this = this;
         t.addEventListener(type, function (evt) {
+            console.dir(evt);
             _this.onevent({
                 handler: handler,
                 data: evt,

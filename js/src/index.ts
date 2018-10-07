@@ -1,3 +1,4 @@
+import Events from './events'
 enum OP_CODE {
     ELEMENT_CREATE = 0,
     ELEMENT_DELETE = 1,
@@ -8,11 +9,6 @@ enum OP_CODE {
 }
 
 type Operation = [OP_CODE, string[], any]
-
-enum EVENTS {
-    'nori-click' = 'click',
-    'nori-change' = 'change',
-}
 
 export default class Nori {
     private _root: HTMLElement
@@ -44,9 +40,13 @@ export default class Nori {
                     const [key, value] = data
                     {
                         const t = target(this._root, path)
-                        const event = EVENTS[key]
-                        t.setAttribute(key, value)
+                        const event = Event[key]
                         if (event) this.event_bind(t, event, value)
+                        if (key === 'value') {
+                            (t as HTMLInputElement).value = value
+                            break
+                        }
+                        t.setAttribute(key, value)
                     }
                     break
 
@@ -71,7 +71,7 @@ export default class Nori {
     event_scan(t: Element, shallow = false) {
         for (let i = 0; i < t.attributes.length; i++) {
             const attr = t.attributes[i]
-            const event = EVENTS[attr.name]
+            const event = Events[attr.name]
             if (!event) continue
             this.event_bind(t, event, attr.value)
         }
@@ -81,11 +81,18 @@ export default class Nori {
         }
     }
 
-    event_bind(t: Element, type: string, handler: string) {
-        t.addEventListener(type, (evt) => {
+    event_bind(
+        t: Element,
+        type: {
+            name: string,
+            transform: (e: Event) => any
+        },
+        handler: string
+    ) {
+        t.addEventListener(type.name, (evt) => {
             this.onevent({
                 handler,
-                data: evt,
+                event: type.transform(evt)
             })
         }, false)
     }
@@ -93,7 +100,7 @@ export default class Nori {
 
 interface NoriEvent {
     handler: string
-    data: any
+    event: any
 }
 
 

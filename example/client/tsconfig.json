@@ -1,10 +1,14 @@
 {
     "compilerOptions": {
         "sourceMap": true,
+        "outDir": "lib",
+        "module": "commonjs",
+        "moduleResolution": "node",
         "noImplicitAny": false,
-        "module": "none",
+        "outFile": "build/index.js",
         "target": "es5",
         "declaration": true,
+        "esModuleInterop": true,
         "lib": [
             "dom",
             "es5",
@@ -15,6 +19,6 @@
         ]
     },
     "include": [
-        "index.ts",
+        "src/index.ts",
     ]
 }
