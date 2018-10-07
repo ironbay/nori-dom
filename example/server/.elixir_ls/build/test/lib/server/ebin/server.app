@@ -1,9 +1,0 @@
-{application,server,
-             [{applications,[kernel,stdlib,elixir,logger,nori,cowboy]},
-              {description,"server"},
-              {modules,['Elixir.Server','Elixir.Server.Application',
-                        'Elixir.Server.OK','Elixir.Server.Router',
-                        'Elixir.Server.Socket','Elixir.Server.UI']},
-              {registered,[]},
-              {vsn,"0.1.0"},
-              {mod,{'Elixir.Server.Application',[]}}]}.
