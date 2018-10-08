@@ -94,6 +94,7 @@ export default class Nori {
                 handler,
                 event: type.transform(evt)
             })
+            evt.preventDefault()
         }, false)
     }
 }
@@ -105,9 +106,13 @@ interface NoriEvent {
 
 
 
-function target(root: HTMLElement, path: string[]) {
+function target(root: Element, path: string[]) {
     if (path.length === 0)
         return root
-    const selector = path.map(item => `[nori="${item}"]`).join(' > ')
-    return root.querySelector(selector)
+    const [head, ...tail] = path
+    for (let i = 0; i < root.children.length; i++) {
+        const child = root.children[i]
+        if (child.getAttribute('nori') === head.toString())
+            return target(child, tail)
+    }
 }

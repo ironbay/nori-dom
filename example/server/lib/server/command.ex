@@ -3,7 +3,7 @@ defmodule Server.Command do
 
   def handle_call(%{action: "nori.init"}, _from, state) do
     data = %{
-      url: "/dashboard"
+      url: "/users"
     }
 
     next = Server.UI.render(data)
@@ -33,7 +33,6 @@ defmodule Server.Command do
   end
 
   def handle_call(msg, _from, state) do
-    IO.inspect(msg)
     {:error, :invalid, state}
   end
 end
