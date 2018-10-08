@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "@ironbay/legos": "^1.0.13",
     "@ironbay/riptide": "0.0.2"
   },
   "devDependencies": {
@@ -11,8 +12,7 @@
     "typescript": "^3.1.1"
   },
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w"
+    "start": "parcel index.html --open"
   },
   "author": "",
   "license": "ISC"

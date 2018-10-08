@@ -1,147 +1,16 @@
 defmodule Nori.HTML do
-  [
-    :a,
-    :abbr,
-    :acronym,
-    :address,
-    :applet,
-    :area,
-    :article,
-    :aside,
-    :audio,
-    :b,
-    :base,
-    :basefont,
-    :bdi,
-    :bdo,
-    :big,
-    :blockquote,
-    :body,
-    :br,
-    :button,
-    :canvas,
-    :caption,
-    :center,
-    :cite,
-    :code,
-    :col,
-    :colgroup,
-    :datalist,
-    :dd,
-    :del,
-    :details,
-    :dfn,
-    :dialog,
-    :dir,
-    :div,
-    :dl,
-    :dt,
-    :em,
-    :embed,
-    :fieldset,
-    :figcaption,
-    :figure,
-    :font,
-    :footer,
-    :form,
-    :frame,
-    :frameset,
-    :h1,
-    :h2,
-    :h3,
-    :h4,
-    :head,
-    :header,
-    :hr,
-    :html,
-    :i,
-    :iframe,
-    :img,
-    :input,
-    :ins,
-    :kbd,
-    :keygen,
-    :label,
-    :legend,
-    :li,
-    :link,
-    :main,
-    :map,
-    :mark,
-    :menu,
-    :menuitem,
-    :meta,
-    :meter,
-    :nav,
-    :noframes,
-    :noscript,
-    :object,
-    :ol,
-    :optgroup,
-    :option,
-    :output,
-    :p,
-    :param,
-    :picture,
-    :pre,
-    :progress,
-    :q,
-    :rp,
-    :rt,
-    :ruby,
-    :s,
-    :samp,
-    :script,
-    :section,
-    :select,
-    :small,
-    :source,
-    :span,
-    :strike,
-    :strong,
-    :sub,
-    :summary,
-    :sup,
-    :table,
-    :tbody,
-    :td,
-    :textarea,
-    :tfoot,
-    :th,
-    :thead,
-    :time,
-    :title,
-    :tr,
-    :track,
-    :tt,
-    :u,
-    :ul,
-    :var,
-    :video,
-    :wbr
-  ]
-  |> Enum.each(fn name ->
-    type = Atom.to_string(name)
-
-    def unquote(name)(attributes \\ [], body \\ []) do
-      Nori.element(
-        unquote(type),
-        attributes,
-        body
-      )
-    end
-  end)
-
   def style(input) do
-    input
-    |> Enum.map(fn {key, value} -> [Atom.to_string(key), ": ", value, ";"] end)
-    |> IO.iodata_to_binary()
+    {:style,
+     input
+     |> Enum.map(fn {key, value} -> [Atom.to_string(key), ": ", value, ";"] end)
+     |> IO.iodata_to_binary()}
   end
 
   def class(input) do
-    input
-    |> Stream.filter(fn {_, value} -> value end)
-    |> Enum.map(fn {key, value} -> [Atom.to_string(key), ": ", value] end)
-    |> IO.iodata_to_binary()
+    {:class,
+     input
+     |> Stream.filter(fn {_, value} -> value end)
+     |> Enum.map(fn {key, value} -> Atom.to_string(key) end)
+     |> Enum.join(" ")}
   end
 end

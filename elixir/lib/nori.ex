@@ -3,7 +3,13 @@ defmodule Nori do
   defstruct key: 0, name: "", attributes: [], children: []
 
   def element(name), do: element(name, [], [])
-  def element(name, attributes), do: element(name, attributes, [])
+
+  def element(name, att_or_children) do
+    cond do
+      Keyword.keyword?(att_or_children) -> element(name, att_or_children, [])
+      true -> element(name, [], att_or_children)
+    end
+  end
 
   def element(name, attributes, children) when is_list(children) === false,
     do: element(name, attributes, [children])

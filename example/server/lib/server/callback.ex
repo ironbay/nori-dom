@@ -1,8 +1,13 @@
 defmodule Nori.Callback do
   def add(fun, args \\ []) do
-    {_, key} = Function.info(fun, :uniq)
-    key = inspect(key)
+    key =
+      fun
+      |> Function.info()
+      |> :erlang.phash2()
+      |> inspect()
+
     Process.put({:handler, key}, {fun, args})
+
     key
   end
 

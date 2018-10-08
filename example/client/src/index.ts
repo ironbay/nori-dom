@@ -4,7 +4,6 @@ import Nori from '../../../js/src/index'
 const root = document.getElementById('root')
 const nori = new Nori(root)
 
-
 async function run() {
     const riptide = new Riptide.Client(Riptide.Transports.WS, Riptide.Formats.Json)
     riptide.transport.connect('ws://localhost:12000/socket')

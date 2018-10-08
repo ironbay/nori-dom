@@ -2,14 +2,18 @@ defmodule Server.Command do
   use Riptide.Command
 
   def handle_call(%{action: "nori.init"}, _from, state) do
-    next = Server.UI.render("")
+    data = %{
+      url: "/dashboard"
+    }
+
+    next = Server.UI.render(data)
 
     reply =
       nil
       |> Nori.diff(next)
       |> Nori.JSON.encode_patch()
 
-    {:reply, reply, %{dom: next, data: ""}}
+    {:reply, reply, %{dom: next, data: data}}
   end
 
   def handle_call(

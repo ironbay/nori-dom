@@ -23,6 +23,7 @@ defmodule Server.MixProject do
   defp deps do
     [
       {:riptide, github: "ironbay/riptide", sparse: "elixir"},
+      {:jaysx, github: "arjan/jaysx"},
       # {:nori, github: "ironbay/nori", sparse: "elixir"}
       {:nori, path: "../../elixir"}
       # {:dep_from_hexpm, "~> 0.3.0"},
