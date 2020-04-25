@@ -6,7 +6,7 @@ defmodule Nori.JSON do
     end)
   end
 
-  def process(item = %Nori{}) do
+  def process(item = %Nori.Element{}) do
     item
     |> Nori.to_html()
     |> IO.iodata_to_binary()
