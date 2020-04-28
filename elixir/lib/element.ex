@@ -1,58 +1,78 @@
 defmodule Nori.Element do
-  defstruct name: "", attributes: [], children: []
-
-  def key(element), do: Keyword.get(element.attributes, :key, 0)
+  defstruct name: nil, attributes: %{}, children: []
 
   defmacro defelement(name) do
     quote do
       defmacro unquote(name)(), do: Nori.Element.element(unquote(name))
-      defmacro unquote(name)(one), do: Nori.Element.element(unquote(name), one)
-      defmacro unquote(name)(one, two), do: Nori.Element.element(unquote(name), one, two)
+
+      defmacro unquote(name)(attr_or_children),
+        do: Nori.Element.element(unquote(name), attr_or_children)
+
+      defmacro unquote(name)(attr, children),
+        do: Nori.Element.element(unquote(name), attr, children)
     end
   end
+
+  # defmacro element(type, attr, do: block) do
+  #   children = Nori.Macro.parse_children(block)
+
+  #   quote do
+  #     %Nori.Element{
+  #       type: unquote(type),
+  #       attributes: Enum.into(unquote(attr), %{}),
+  #       children: unquote(children)
+  #     }
+  #   end
+  # end
 
   def element(name), do: element(name, [], do: [])
   def element(name, do: children), do: element(name, [], do: children)
   def element(name, attr), do: element(name, attr, do: [])
 
-  def element(name, attr, do: children) do
-    elems = parse_children(children)
+  def element(name, attr, do: block) do
+    children = Nori.Macro.parse_children(block)
 
     quote do
-      children =
-        unquote(elems)
-        |> Stream.flat_map(fn
-          child when is_list(child) -> child
-          result -> [result]
-        end)
-        |> Stream.filter(fn item -> item end)
-        |> Enum.to_list()
-
       %Nori.Element{
         name: unquote(name),
-        attributes: unquote(attr),
-        children: Nori.Element.generate_keys(children)
+        attributes: Enum.into(unquote(attr), %{}),
+        children: unquote(children)
       }
     end
   end
+end
 
-  def parse_children(input) do
-    case input do
-      {:__block__, _, elems} -> elems
-      [] -> []
-      result -> [result]
+defmodule Nori.ExampleComponent do
+  use Nori.Component
+
+  def mount(), do: %{count: :random.uniform(1000)}
+
+  def render(_props, state) do
+    nori do
+      div class: "root" do
+        Nori.ExampleChildComponent.component class: "two" do
+          state.count
+        end
+
+        Nori.ExampleChildComponent.component class: "one", key: "alpha" do
+          "One"
+        end
+
+        Nori.ExampleChildComponent.component class: "three" do
+          "Three"
+        end
+      end
     end
   end
+end
 
-  def generate_keys(children) do
-    children
-    |> Stream.with_index()
-    |> Enum.map(fn
-      {result = %Nori.Element{}, index} ->
-        %{result | attributes: Keyword.put(result.attributes, :key, index)}
+defmodule Nori.ExampleChildComponent do
+  use Nori.Component
+  def mount(), do: %{}
 
-      {child, _} ->
-        child
-    end)
+  def render(props, _state) do
+    nori do
+      div(do: props.children)
+    end
   end
 end
