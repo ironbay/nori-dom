@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "declaration": true,
+        "declarationDir": "./dist",
+        "module": "es6",
+        "moduleResolution": "Node",
+        "noImplicitAny": false,
+        "outDir": "./dist",
+        "target": "es2015",
+    },
+    "include": [
+        "./src/**/*",
+    ],
+}

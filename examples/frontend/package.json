@@ -1,0 +1,25 @@
+{
+  "name": "todo_list",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.html",
+  "scripts": {
+    "start": "parcel serve ./src/index.html --open",
+    "serve": "parcel serve ./src/index.html --no-hmr --no-cache ",
+    "build": "parcel build ./src/index.html --dist-dir dist"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/preset-typescript": "^7.8.3",
+    "@babel/register": "^7.8.3",
+    "@parcel/babel-preset": "^2.0.0-alpha.2",
+    "@types/node": "13.7.1",
+    "parcel": "2.0.0-nightly.165",
+    "typescript": "3.8.0-beta"
+  },
+  "dependencies": {
+    "@ironbay/nori": "file:../../packages/javascript",
+    "@ironbay/riptide": "^0.2.3"
+  }
+}
